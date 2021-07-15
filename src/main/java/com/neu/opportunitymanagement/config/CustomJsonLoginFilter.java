@@ -3,7 +3,7 @@ package com.neu.opportunitymanagement.config;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.neu.opportunitymanagement.oppManagement.dto.Role;
+import com.neu.opportunitymanagement.oppManagement.dto.common.Role;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.neu.opportunitymanagement.oppManagement.service.IEmployeeService;
 import org.springframework.security.authentication.AuthenticationServiceException;

@@ -1,4 +1,4 @@
-package com.neu.opportunitymanagement.oppManagement.dto;
+package com.neu.opportunitymanagement.oppManagement.dto.common;
 
 import java.io.Serializable;
 

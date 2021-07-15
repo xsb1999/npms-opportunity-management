@@ -3,7 +3,7 @@ package com.neu.opportunitymanagement.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
-import com.neu.opportunitymanagement.oppManagement.dto.RespBean;
+import com.neu.opportunitymanagement.oppManagement.dto.common.RespBean;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,10 +1,12 @@
 package com.neu.opportunitymanagement.oppManagement.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+
 import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xsb
@@ -14,6 +16,7 @@ public class Customer implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @TableId
     private String cusId;
 
     private String cusName;

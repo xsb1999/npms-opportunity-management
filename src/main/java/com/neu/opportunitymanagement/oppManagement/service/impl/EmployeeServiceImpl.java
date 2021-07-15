@@ -1,6 +1,6 @@
 package com.neu.opportunitymanagement.oppManagement.service.impl;
 
-import com.neu.opportunitymanagement.oppManagement.dto.Role;
+import com.neu.opportunitymanagement.oppManagement.dto.common.Role;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.neu.opportunitymanagement.oppManagement.mapper.EmployeeMapper;
 import com.neu.opportunitymanagement.oppManagement.service.IEmployeeService;

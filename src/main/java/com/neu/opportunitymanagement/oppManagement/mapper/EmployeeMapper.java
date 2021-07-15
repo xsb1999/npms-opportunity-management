@@ -1,6 +1,6 @@
 package com.neu.opportunitymanagement.oppManagement.mapper;
 
-import com.neu.opportunitymanagement.oppManagement.dto.Role;
+import com.neu.opportunitymanagement.oppManagement.dto.common.Role;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

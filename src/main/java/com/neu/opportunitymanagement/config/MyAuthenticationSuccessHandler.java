@@ -1,7 +1,7 @@
 package com.neu.opportunitymanagement.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.neu.opportunitymanagement.oppManagement.dto.RespBean;
+import com.neu.opportunitymanagement.oppManagement.dto.common.RespBean;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.neu.opportunitymanagement.oppManagement.service.IEmployeeService;
 import com.neu.opportunitymanagement.util.SpringUtil;

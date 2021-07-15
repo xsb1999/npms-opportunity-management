@@ -1,34 +1,23 @@
-package com.neu.opportunitymanagement.oppManagement.entity;
+package com.neu.opportunitymanagement.oppManagement.dto.opportunity;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-
-import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author xsb
- * @since 2021-07-15
- */
-public class Opportunity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @TableId
+public class OppSearchResult implements Serializable {
     private String oppId;
 
     private String oppName;
 
     private String oppSalesDept;
+    private String oppSalesDeptName;
 
     private String oppCustomerManagerId;
+    private String oppCustomerManagerName;
 
     private LocalDateTime oppSignTime;
 
     private String oppBelonging;
+    private String oppBelongingName;
 
     private String oppStatus;
 
@@ -45,7 +34,6 @@ public class Opportunity implements Serializable {
     private String oppCusId;
 
     private String oppOrigin;
-
 
     public String getOppId() {
         return oppId;
@@ -71,12 +59,28 @@ public class Opportunity implements Serializable {
         this.oppSalesDept = oppSalesDept;
     }
 
+    public String getOppSalesDeptName() {
+        return oppSalesDeptName;
+    }
+
+    public void setOppSalesDeptName(String oppSalesDeptName) {
+        this.oppSalesDeptName = oppSalesDeptName;
+    }
+
     public String getOppCustomerManagerId() {
         return oppCustomerManagerId;
     }
 
     public void setOppCustomerManagerId(String oppCustomerManagerId) {
         this.oppCustomerManagerId = oppCustomerManagerId;
+    }
+
+    public String getOppCustomerManagerName() {
+        return oppCustomerManagerName;
+    }
+
+    public void setOppCustomerManagerName(String oppCustomerManagerName) {
+        this.oppCustomerManagerName = oppCustomerManagerName;
     }
 
     public LocalDateTime getOppSignTime() {
@@ -159,23 +163,34 @@ public class Opportunity implements Serializable {
         this.oppOrigin = oppOrigin;
     }
 
+    public String getOppBelongingName() {
+        return oppBelongingName;
+    }
+
+    public void setOppBelongingName(String oppBelongingName) {
+        this.oppBelongingName = oppBelongingName;
+    }
+
     @Override
     public String toString() {
-        return "Opportunity{" +
-        "oppId=" + oppId +
-        ", oppName=" + oppName +
-        ", oppSalesDept=" + oppSalesDept +
-        ", oppCustomerManagerId=" + oppCustomerManagerId +
-        ", oppSignTime=" + oppSignTime +
-        ", oppBelonging=" + oppBelonging +
-        ", oppStatus=" + oppStatus +
-        ", oppPhase=" + oppPhase +
-        ", oppType=" + oppType +
-        ", oppProduct=" + oppProduct +
-        ", oppBackground=" + oppBackground +
-        ", oppCigarettes=" + oppCigarettes +
-        ", oppCusId=" + oppCusId +
-        ", oppOrigin=" + oppOrigin +
-        "}";
+        return "OppSearchResult{" +
+                "oppId='" + oppId + '\'' +
+                ", oppName='" + oppName + '\'' +
+                ", oppSalesDept='" + oppSalesDept + '\'' +
+                ", oppSalesDeptName='" + oppSalesDeptName + '\'' +
+                ", oppCustomerManagerId='" + oppCustomerManagerId + '\'' +
+                ", oppCustomerManagerName='" + oppCustomerManagerName + '\'' +
+                ", oppSignTime=" + oppSignTime +
+                ", oppBelonging='" + oppBelonging + '\'' +
+                ", oppBelongingName='" + oppBelongingName + '\'' +
+                ", oppStatus='" + oppStatus + '\'' +
+                ", oppPhase='" + oppPhase + '\'' +
+                ", oppType='" + oppType + '\'' +
+                ", oppProduct='" + oppProduct + '\'' +
+                ", oppBackground='" + oppBackground + '\'' +
+                ", oppCigarettes='" + oppCigarettes + '\'' +
+                ", oppCusId='" + oppCusId + '\'' +
+                ", oppOrigin='" + oppOrigin + '\'' +
+                '}';
     }
 }
