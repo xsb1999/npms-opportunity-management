@@ -2,6 +2,8 @@ package com.neu.opportunitymanagement.oppManagement.mapper;
 
 import com.neu.opportunitymanagement.oppManagement.entity.CompetitorBuffer;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -11,6 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author xsb
  * @since 2021-07-15
  */
+@Mapper
+@Repository
 public interface CompetitorBufferMapper extends BaseMapper<CompetitorBuffer> {
 
 }

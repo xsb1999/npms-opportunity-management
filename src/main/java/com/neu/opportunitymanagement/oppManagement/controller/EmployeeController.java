@@ -1,7 +1,6 @@
 package com.neu.opportunitymanagement.oppManagement.controller;
 
 
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -15,13 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2021-07-15
  */
 @RestController
-@RequestMapping("/oppManagement/opportunity")
-public class OpportunityController {
-
-    @GetMapping("test")
-    public String test(){
-        return "ok";
-    }
+@RequestMapping("/oppManagement/employee")
+public class EmployeeController {
 
 }
 
