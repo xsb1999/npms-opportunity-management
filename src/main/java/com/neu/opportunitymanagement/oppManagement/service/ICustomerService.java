@@ -1,5 +1,6 @@
 package com.neu.opportunitymanagement.oppManagement.service;
 
+import com.neu.opportunitymanagement.oppManagement.dto.common.RespBean;
 import com.neu.opportunitymanagement.oppManagement.entity.Customer;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ICustomerService extends IService<Customer> {
 
+    // 根据客户名称查询客户信息
+    public RespBean getCusNameByCusId(String cus_name);
 }

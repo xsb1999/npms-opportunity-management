@@ -79,40 +79,94 @@
     <select id="getOpportunity" parameterType="OppSearchCondition" resultType="OppSearchResult">
         select * from opportunity
         <where>
-            <if test="oppId != null">
+            <if test="oppId != null and oppId != ''">
                 opp_id like "%"#{oppId}"%"
             </if>
-            <if test="oppName != null">
+            <if test="oppName != null and oppName != ''">
                 and opp_name like "%"#{oppName}"%"
             </if>
-            <if test="oppSalesDept != null">
+            <if test="oppSalesDept != null and oppSalesDept != ''">
                 and opp_sales_dept = #{oppSalesDept}
             </if>
-            <if test="oppSignTime1 != null and oppSignTime2 != null">
+            <if test="oppSignTime1 != null and oppSignTime2 != null and oppSignTime1 != '' and oppSignTime2 != ''">
                 and opp_sign_time between #{oppSignTime1} and #{oppSignTime2}
             </if>
-            <if test="oppCustomerManagerId != null">
+            <if test="oppCustomerManagerId != null and oppCustomerManagerId != ''">
                 and opp_customer_manager_id = #{oppCustomerManagerId}
             </if>
-            <if test="oppBelonging != null">
+            <if test="oppBelonging != null and oppBelonging != ''">
                 and opp_belonging = #{oppBelonging}
             </if>
-            <if test="oppStatus != null">
+            <if test="oppStatus != null and oppStatus != ''">
                 and opp_status = #{oppStatus}
             </if>
-            <if test="oppPhase != null">
+            <if test="oppPhase != null and oppPhase != ''">
                 and opp_phase = #{oppPhase}
             </if>
-            <if test="oppType != null">
+            <if test="oppType != null and oppType != ''">
                 and opp_type = #{oppType}
             </if>
-            <if test="oppProduct != null">
+            <if test="oppProduct != null and oppProduct != ''">
                 and opp_product = #{oppProduct}
             </if>
         </where>
     </select>
 
 
+
+    <resultMap id="getOpportunityBMap" type="OppSearchResult">
+        <id column="oppb_id" property="oppBId"></id>
+        <result column="oppb_name" property="oppName"></result>
+        <result column="oppb_sales_dept" property="oppSalesDept"></result>
+        <result column="oppb_customer_manager_id" property="oppCustomerManagerId"></result>
+        <result column="oppb_sign_time" property="oppSignTime"></result>
+        <result column="oppb_belonging" property="oppBelonging"></result>
+        <result column="oppb_status" property="oppStatus"></result>
+        <result column="oppb_phase" property="oppPhase"></result>
+        <result column="oppb_type" property="oppType"></result>
+        <result column="oppb_product" property="oppProduct"></result>
+        <result column="oppb_background" property="oppBackground"></result>
+        <result column="oppb_cigarettes" property="oppCigarettes"></result>
+        <result column="oppb_cus_id" property="oppCusId"></result>
+        <result column="oppb_approve_status" property="oppbApproveStatus"></result>
+        <result column="oppb_opp_id" property="oppId"></result>
+        <result column="oppb_origin" property="oppOrigin"></result>
+    </resultMap>
+
+
+    <select id="getOpportunityB" parameterType="OppSearchCondition" resultMap="getOpportunityBMap">
+        select * from opportunity_buffer
+        <where>
+            ISNULL(oppb_opp_id) and oppb_status in (10,20,60)
+            <if test="oppName != null and oppName != ''">
+                and oppb_name like "%"#{oppName}"%"
+            </if>
+            <if test="oppSalesDept != null and oppSalesDept != ''">
+                and oppb_sales_dept = #{oppSalesDept}
+            </if>
+            <if test="oppSignTime1 != null and oppSignTime2 != null and oppSignTime1 != '' and oppSignTime2 != ''">
+                and oppb_sign_time between #{oppSignTime1} and #{oppSignTime2}
+            </if>
+            <if test="oppCustomerManagerId != null and oppCustomerManagerId != ''">
+                and oppb_customer_manager_id = #{oppCustomerManagerId}
+            </if>
+            <if test="oppBelonging != null and oppBelonging != ''">
+                and oppb_belonging = #{oppBelonging}
+            </if>
+            <if test="oppStatus != null and oppStatus != ''">
+                and oppb_status = #{oppStatus}
+            </if>
+            <if test="oppPhase != null and oppPhase != ''">
+                and oppb_phase = #{oppPhase}
+            </if>
+            <if test="oppType != null and oppType != ''">
+                and oppb_type = #{oppType}
+            </if>
+            <if test="oppProduct != null and oppProduct != ''">
+                and oppb_product = #{oppProduct}
+            </if>
+        </where>
+    </select>
 
 
 

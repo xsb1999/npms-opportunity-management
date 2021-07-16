@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public class OppSearchResult implements Serializable {
     private String oppId;
+    private String oppBId;  // 缓存机会表的id
 
     private String oppName;
 
@@ -34,6 +35,8 @@ public class OppSearchResult implements Serializable {
     private String oppCusId;
 
     private String oppOrigin;
+
+    private String oppbApproveStatus;
 
     public String getOppId() {
         return oppId;
@@ -171,10 +174,27 @@ public class OppSearchResult implements Serializable {
         this.oppBelongingName = oppBelongingName;
     }
 
+    public String getOppBId() {
+        return oppBId;
+    }
+
+    public void setOppBId(String oppBId) {
+        this.oppBId = oppBId;
+    }
+
+    public String getOppbApproveStatus() {
+        return oppbApproveStatus;
+    }
+
+    public void setOppbApproveStatus(String oppbApproveStatus) {
+        this.oppbApproveStatus = oppbApproveStatus;
+    }
+
     @Override
     public String toString() {
         return "OppSearchResult{" +
                 "oppId='" + oppId + '\'' +
+                ", oppBId='" + oppBId + '\'' +
                 ", oppName='" + oppName + '\'' +
                 ", oppSalesDept='" + oppSalesDept + '\'' +
                 ", oppSalesDeptName='" + oppSalesDeptName + '\'' +
@@ -191,6 +211,7 @@ public class OppSearchResult implements Serializable {
                 ", oppCigarettes='" + oppCigarettes + '\'' +
                 ", oppCusId='" + oppCusId + '\'' +
                 ", oppOrigin='" + oppOrigin + '\'' +
+                ", oppbApproveStatus='" + oppbApproveStatus + '\'' +
                 '}';
     }
 }

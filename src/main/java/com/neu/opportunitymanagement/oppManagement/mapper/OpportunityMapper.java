@@ -51,8 +51,11 @@ public interface OpportunityMapper extends BaseMapper<Opportunity> {
     // 机会类型和产品二级联动 (根据产品查询机会类型)
     public List<OppTypeInfo> getTypeByProduct(String pro_id);
 
-    // 机会查询
+    // 机会查询（查询正常的机会）
     public List<OppSearchResult> getOpportunity(OppSearchCondition searchCondition);
+    // 机会查询（查询机会缓存表中的机会（在审批中的机会））
+    public List<OppSearchResult> getOpportunityB(OppSearchCondition searchCondition);
+
 
 
 

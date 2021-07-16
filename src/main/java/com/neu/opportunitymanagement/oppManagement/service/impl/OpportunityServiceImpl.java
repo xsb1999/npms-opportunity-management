@@ -187,7 +187,15 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
 
     @Override
     public RespBean getOpportunity(OppSearchCondition oppSearchCondition) {
-        List<OppSearchResult> oppSearchResultList = opportunityMapper.getOpportunity(oppSearchCondition);
+        List<OppSearchResult> oppSearchResultList = new ArrayList<>();
+        // 查询缓存机会表的机会（新增的机会，属于草稿状态或者流程中或者是退回状态，id为null）
+        List<OppSearchResult> oppSearchResultList1 = opportunityMapper.getOpportunityB(oppSearchCondition);
+        // 查询普通机会表
+        List<OppSearchResult> oppSearchResultList2 = opportunityMapper.getOpportunity(oppSearchCondition);
+
+        oppSearchResultList.addAll(oppSearchResultList1);
+        oppSearchResultList.addAll(oppSearchResultList2);
+
         // 获取部门名称，客户经理姓名，机会归属名称
         for (OppSearchResult osr : oppSearchResultList) {
             osr.setOppSalesDeptName(opportunityMapper.getDeptNameById(osr.getOppSalesDept()));

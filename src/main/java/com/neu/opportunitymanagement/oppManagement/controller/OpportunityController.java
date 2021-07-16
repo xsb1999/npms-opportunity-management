@@ -2,19 +2,13 @@ package com.neu.opportunitymanagement.oppManagement.controller;
 
 
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppDetail;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppIdAndEmpPosition;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePageInfo;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
+import com.neu.opportunitymanagement.oppManagement.service.IOpportunityBufferService;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,6 +26,9 @@ public class OpportunityController {
 
     @Autowired
     IOpportunityService iOpportunityService;
+    @Autowired
+    IOpportunityBufferService iOpportunityBufferService;
+
 
     // 初始化机会管理页面
     @GetMapping("getMainPage")
@@ -83,6 +80,30 @@ public class OpportunityController {
     @GetMapping("getOpportunity")
     public RespBean getOpportunity(@RequestBody OppSearchCondition oppSearchCondition){
         return iOpportunityService.getOpportunity(oppSearchCondition);
+    }
+
+    // 机会新增
+    @PostMapping("addOpportunity")
+    public RespBean addOpportunity(@RequestBody AddOpportunityInfo addOpportunityInfo){
+        RespBean respBean = null;
+        try {
+            respBean = iOpportunityBufferService.addOpportunity(addOpportunityInfo);
+        }catch (Exception e){
+            respBean = RespBean.error(500, "系统错误，请联系管理员...");
+        }
+        return respBean;
+    }
+
+    // 机会修改
+    @PostMapping("updateOpportunity")
+    public RespBean updateOpportunity(@RequestBody UpdateOpportunityInfo updateOpportunityInfo){
+        RespBean respBean = null;
+        try {
+            respBean = iOpportunityBufferService.updateOpportunity(updateOpportunityInfo);
+        }catch (Exception e){
+            respBean = RespBean.error(500, "系统错误，请联系管理员...");
+        }
+        return respBean;
     }
 
 

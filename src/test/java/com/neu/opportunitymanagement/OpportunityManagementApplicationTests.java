@@ -24,4 +24,18 @@ class OpportunityManagementApplicationTests {
         System.out.println(opportunityMapper.getOpportunity(condition));
     }
 
+
+    @Test
+    public void test2(){
+        OppSearchCondition condition = new OppSearchCondition();
+        System.out.println(opportunityMapper.getOpportunityB(condition));
+    }
+
+
+
+
+
+
+
+
 }
