@@ -31,6 +31,14 @@
 
     </select>
 
+    <select id="getDeptNameById" parameterType="String" resultType="String">
+        select dept_name from department where dept_id = #{dept_id};
+    </select>
+
+    <select id="getCusMgrNameById" parameterType="String" resultType="String">
+        select emp_name from employee where emp_id = #{cusMgr_id};
+    </select>
+
     <select id="getOppBelonging" parameterType="String" resultType="OppBelongingInfo">
         select * from c_bu
         <where>
@@ -66,5 +74,48 @@
         from c_project_type_product_rel, c_project_sub_opp_type
         where cptpr_bus_id = pso_id and cptpr_pro_id = #{pro_id};
     </select>
+
+
+    <select id="getOpportunity" parameterType="OppSearchCondition" resultType="OppSearchResult">
+        select * from opportunity
+        <where>
+            <if test="oppId != null">
+                opp_id like "%"#{oppId}"%"
+            </if>
+            <if test="oppName != null">
+                and opp_name like "%"#{oppName}"%"
+            </if>
+            <if test="oppSalesDept != null">
+                and opp_sales_dept = #{oppSalesDept}
+            </if>
+            <if test="oppSignTime1 != null and oppSignTime2 != null">
+                and opp_sign_time between #{oppSignTime1} and #{oppSignTime2}
+            </if>
+            <if test="oppCustomerManagerId != null">
+                and opp_customer_manager_id = #{oppCustomerManagerId}
+            </if>
+            <if test="oppBelonging != null">
+                and opp_belonging = #{oppBelonging}
+            </if>
+            <if test="oppStatus != null">
+                and opp_status = #{oppStatus}
+            </if>
+            <if test="oppPhase != null">
+                and opp_phase = #{oppPhase}
+            </if>
+            <if test="oppType != null">
+                and opp_type = #{oppType}
+            </if>
+            <if test="oppProduct != null">
+                and opp_product = #{oppProduct}
+            </if>
+        </where>
+    </select>
+
+
+
+
+
+
 
 </mapper>

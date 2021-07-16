@@ -1,6 +1,7 @@
 package com.neu.opportunitymanagement.oppManagement.mapper;
 
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchResult;
 import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -35,6 +36,12 @@ public interface OpportunityMapper extends BaseMapper<Opportunity> {
     // 根据机会归属id查询机会归属名称
     public String getOppBelongingNameById(String oppb_id);
 
+    // 根据部门id查询部门名称
+    public String getDeptNameById(String dept_id);
+
+    // 根据客户经理id查询其姓名
+    public String getCusMgrNameById(String cusMgr_id);
+
     // 销售部门和客户经理二级联动
     public List<EmpInfo> getEmpByDept(String dept_id);
 
@@ -43,6 +50,9 @@ public interface OpportunityMapper extends BaseMapper<Opportunity> {
 
     // 机会类型和产品二级联动 (根据产品查询机会类型)
     public List<OppTypeInfo> getTypeByProduct(String pro_id);
+
+    // 机会查询
+    public List<OppSearchResult> getOpportunity(OppSearchCondition searchCondition);
 
 
 

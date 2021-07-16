@@ -2,8 +2,12 @@ package com.neu.opportunitymanagement.oppManagement.controller;
 
 
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppDetail;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppIdAndEmpPosition;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePageInfo;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
+import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,6 +68,23 @@ public class OpportunityController {
         RespBean respBean = RespBean.ok(200,"ok",oppTypeInfoList);
         return respBean;
     }
+
+    // 点击机会编号展示机会详细信息
+    @GetMapping("showOppDetail")
+    public RespBean showOppDetail(@RequestBody OppIdAndEmpPosition op){
+        String oppId = op.getOppId();
+        String empPositionId = op.getEmpPositionId();
+        OppDetail oppDetail = iOpportunityService.showOppDetail(oppId, empPositionId);
+        RespBean respBean = RespBean.ok(200,"ok",oppDetail);
+        return respBean;
+    }
+
+    // 机会查询
+    @GetMapping("getOpportunity")
+    public RespBean getOpportunity(@RequestBody OppSearchCondition oppSearchCondition){
+        return iOpportunityService.getOpportunity(oppSearchCondition);
+    }
+
 
 
 

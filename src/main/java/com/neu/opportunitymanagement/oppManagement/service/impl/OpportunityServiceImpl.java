@@ -1,16 +1,20 @@
 package com.neu.opportunitymanagement.oppManagement.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppDetail;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePageInfo;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchResult;
-import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
-import com.neu.opportunitymanagement.oppManagement.mapper.EmployeeMapper;
-import com.neu.opportunitymanagement.oppManagement.mapper.OpportunityMapper;
+import com.neu.opportunitymanagement.oppManagement.entity.*;
+import com.neu.opportunitymanagement.oppManagement.mapper.*;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,14 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     OpportunityMapper opportunityMapper;
     @Autowired
     EmployeeMapper employeeMapper;
+    @Autowired
+    SubOpportunityMapper subOpportunityMapper;
+    @Autowired
+    CompetitorMapper competitorMapper;
+    @Autowired
+    PayerMapper payerMapper;
+    @Autowired
+    TrackinglogMapper trackinglogMapper;
 
 
     @Override
@@ -132,4 +144,66 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     public List<OppTypeInfo> getTypeByProduct(String pro_id) {
         return opportunityMapper.getTypeByProduct(pro_id);
     }
+
+    @Override
+    public OppDetail showOppDetail(String oppId, String empPositionId) {
+
+        Opportunity opportunity = new Opportunity();
+        List<SubOpportunity> subOpportunityList = new ArrayList<>();
+        List<Competitor> competitorList = new ArrayList<>();
+        List<Payer> payerList = new ArrayList<>();
+        List<Trackinglog> trackinglogList = new ArrayList<>();
+
+        // 获取机会信息
+        opportunity = opportunityMapper.selectById(oppId);
+        // 获取子机会列表
+        QueryWrapper<SubOpportunity> qw = Wrappers.query();
+        qw.eq("sub_opp_opp_id", oppId);
+        subOpportunityList = subOpportunityMapper.selectList(qw);
+        // 获取竞争情况列表
+        QueryWrapper<Competitor> qw1 = Wrappers.query();
+        qw1.eq("comp_opp_id", oppId);
+        competitorList = competitorMapper.selectList(qw1);
+        // 获取购买决策人列表
+        QueryWrapper<Payer> qw2 = Wrappers.query();
+        qw2.eq("p_opp_id", oppId);
+        payerList = payerMapper.selectList(qw2);
+        // 获取机会跟踪日志列表（只有营销副总和高层领导可以看到机会跟踪记录信息）
+        if (empPositionId.equals("20000010") || empPositionId.equals("50000000")){
+            QueryWrapper<Trackinglog> qw3 = Wrappers.query();
+            qw3.eq("t_opp_id", oppId);
+            trackinglogList = trackinglogMapper.selectList(qw3);
+        }
+
+        OppDetail oppDetail = new OppDetail();
+        oppDetail.setOpportunity(opportunity);
+        oppDetail.setSubOpportunityList(subOpportunityList);
+        oppDetail.setCompetitorList(competitorList);
+        oppDetail.setPayerList(payerList);
+        oppDetail.setTrackinglogList(trackinglogList);
+
+        return oppDetail;
+    }
+
+    @Override
+    public RespBean getOpportunity(OppSearchCondition oppSearchCondition) {
+        List<OppSearchResult> oppSearchResultList = opportunityMapper.getOpportunity(oppSearchCondition);
+        // 获取部门名称，客户经理姓名，机会归属名称
+        for (OppSearchResult osr : oppSearchResultList) {
+            osr.setOppSalesDeptName(opportunityMapper.getDeptNameById(osr.getOppSalesDept()));
+            osr.setOppCustomerManagerName(opportunityMapper.getCusMgrNameById(osr.getOppCustomerManagerId()));
+            osr.setOppBelongingName(opportunityMapper.getOppBelongingNameById(osr.getOppBelonging()));
+        }
+        String msg = "";
+        // 若查询结果为空，则提示“未查询到结果！”
+        if (oppSearchResultList.isEmpty()){
+            msg = "未查询到结果！";
+        }else {
+            msg = "查询成功！";
+        }
+        RespBean respBean = RespBean.ok(200, msg, oppSearchResultList);
+        return respBean;
+    }
+
+
 }
