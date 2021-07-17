@@ -3,10 +3,7 @@ package com.neu.opportunitymanagement.oppManagement.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppDetail;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePageInfo;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
-import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchResult;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
 import com.neu.opportunitymanagement.oppManagement.entity.*;
 import com.neu.opportunitymanagement.oppManagement.mapper.*;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
@@ -14,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.image.RasterFormatException;
 import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +39,15 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     PayerMapper payerMapper;
     @Autowired
     TrackinglogMapper trackinglogMapper;
+    @Autowired
+    OpportunityBufferMapper opportunityBufferMapper;
+    @Autowired
+    SubOpportunityBufferMapper subOpportunityBufferMapper;
+    @Autowired
+    CompetitorBufferMapper competitorBufferMapper;
+    @Autowired
+    PayerBufferMapper payerBufferMapper;
+
 
 
     @Override
@@ -210,6 +217,84 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
             msg = "查询成功！";
         }
         RespBean respBean = RespBean.ok(200, msg, oppSearchResultList);
+        return respBean;
+    }
+
+    @Override
+    public RespBean showUpdatePage(OppIdAndOppBId oppIdAndOppBId) {
+        // 机会状态为流程中、暂停、结束的不能修改
+        if (oppIdAndOppBId.getOppStatus().equals("20")){
+            return RespBean.error(500, "该机会状态为流程中，不能修改！");
+        }
+        if (oppIdAndOppBId.getOppStatus().equals("40")){
+            return RespBean.error(500, "该机会状态为暂停，不能修改！");
+        }
+        if (oppIdAndOppBId.getOppStatus().equals("50")){
+            return RespBean.error(500, "该机会状态为关闭，不能修改！");
+        }
+
+        UpdatePageInfo updatePageInfo = new UpdatePageInfo();
+        String opp_id = oppIdAndOppBId.getOppId();
+        String oppb_id = oppIdAndOppBId.getOppBId();
+        // 判断该机会是否为新增的，若机会id为null则是新增的，需要从缓存表中查询
+        if (opp_id == null){
+            OpportunityBuffer opportunityBuffer;
+            List<SubOpportunityBuffer> subOpportunityBufferList;
+            List<CompetitorBuffer> competitorBufferList;
+            List<PayerBuffer> payerBufferList;
+
+            opportunityBuffer = opportunityBufferMapper.selectById(oppb_id);
+
+            QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+            qw1.eq("sub_oppb_opp_id", oppb_id);
+            subOpportunityBufferList = subOpportunityBufferMapper.selectList(qw1);
+
+            QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+            qw2.eq("compb_opp_id", oppb_id);
+            competitorBufferList = competitorBufferMapper.selectList(qw2);
+
+            QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+            qw3.eq("pb_opp_id", oppb_id);
+            payerBufferList = payerBufferMapper.selectList(qw3);
+
+            BufferOppInfo bufferOppInfo = new BufferOppInfo();
+            bufferOppInfo.setOpportunityBuffer(opportunityBuffer);
+            bufferOppInfo.setSubOpportunityBufferList(subOpportunityBufferList);
+            bufferOppInfo.setCompetitorBufferList(competitorBufferList);
+            bufferOppInfo.setPayerBufferList(payerBufferList);
+
+            updatePageInfo.setBufferOppInfo(bufferOppInfo);
+
+        }else {
+            Opportunity opportunity;
+            List<SubOpportunity> subOpportunityList;
+            List<Competitor> competitorList;
+            List<Payer> payerList;
+
+            opportunity = opportunityMapper.selectById(opp_id);
+
+            QueryWrapper<SubOpportunity> qw1 = Wrappers.query();
+            qw1.eq("sub_opp_opp_id", opp_id);
+            subOpportunityList = subOpportunityMapper.selectList(qw1);
+
+            QueryWrapper<Competitor> qw2 = Wrappers.query();
+            qw2.eq("comp_opp_id", opp_id);
+            competitorList = competitorMapper.selectList(qw2);
+
+            QueryWrapper<Payer> qw3 = Wrappers.query();
+            qw3.eq("p_opp_id", opp_id);
+            payerList = payerMapper.selectList(qw3);
+
+            CommonOppInfo commonOppInfo = new CommonOppInfo();
+            commonOppInfo.setOpportunity(opportunity);
+            commonOppInfo.setSubOpportunityList(subOpportunityList);
+            commonOppInfo.setCompetitorList(competitorList);
+            commonOppInfo.setPayerList(payerList);
+
+            updatePageInfo.setCommonOppInfo(commonOppInfo);
+        }
+
+        RespBean respBean = RespBean.ok(200, "ok", updatePageInfo);
         return respBean;
     }
 

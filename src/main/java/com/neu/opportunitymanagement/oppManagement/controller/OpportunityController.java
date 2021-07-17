@@ -94,6 +94,12 @@ public class OpportunityController {
         return respBean;
     }
 
+    // 点击“修改”按钮，显示修改页面
+    @GetMapping("showUpdatePage")
+    public RespBean showUpdatePage(@RequestBody OppIdAndOppBId oppIdAndOppBId){
+        return iOpportunityService.showUpdatePage(oppIdAndOppBId);
+    }
+
     // 机会修改
     @PostMapping("updateOpportunity")
     public RespBean updateOpportunity(@RequestBody UpdateOpportunityInfo updateOpportunityInfo){

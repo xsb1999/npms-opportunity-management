@@ -5,6 +5,7 @@ import com.neu.opportunitymanagement.oppManagement.dto.common.OppTypeInfo;
 import com.neu.opportunitymanagement.oppManagement.dto.common.ProductInfo;
 import com.neu.opportunitymanagement.oppManagement.dto.common.RespBean;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppDetail;
+import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppIdAndOppBId;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePageInfo;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
 import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
@@ -40,6 +41,8 @@ public interface IOpportunityService extends IService<Opportunity> {
     // 机会查询
     public RespBean getOpportunity(OppSearchCondition oppSearchCondition);
 
+    // 点击“修改”按钮，显示修改页面
+    public RespBean showUpdatePage(OppIdAndOppBId oppIdAndOppBId);
 
 
 
