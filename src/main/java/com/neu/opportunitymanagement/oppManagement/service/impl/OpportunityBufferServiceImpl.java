@@ -48,6 +48,26 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
     PayerMapper payerMapper;
 
 
+    @Override
+    public RespBean testAddRepetition(String oppbName, String cusId) {
+        RespBean respBean = null;
+        // 同一个客户的机会名称不能有重复
+        QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
+        qw2.eq("oppb_name", oppbName).eq("oppb_cus_id", cusId);
+        List<OpportunityBuffer> list1 = opportunityBufferMapper.selectList(qw2);
+        QueryWrapper<Opportunity> qw3 = Wrappers.query();
+        qw3.eq("opp_name", oppbName).eq("opp_cus_id", cusId);
+        List<Opportunity> list2 = opportunityMapper.selectList(qw3);
+
+        // 这个客户已经存在该机会名称了，新增失败
+        if (!list1.isEmpty() || !list2.isEmpty()){
+            System.out.println("机会名称重复！");
+            respBean = RespBean.error(500, "机会名称重复！");
+        }else {
+            respBean = RespBean.ok(200, "ok");
+        }
+        return respBean;
+    }
 
     @Override
     @Transactional(rollbackFor=Exception.class)
@@ -63,20 +83,20 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
         // 这是新增的机会
         if (opportunityBuffer.getOppbOppId() == null){
             System.out.println("新增的机会");
-            // 同一个客户的机会名称不能有重复
-            QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
-            qw2.eq("oppb_name", opportunityBuffer.getOppbName()).eq("oppb_cus_id", opportunityBuffer.getOppbCusId());
-            List<OpportunityBuffer> list1 = opportunityBufferMapper.selectList(qw2);
-            QueryWrapper<Opportunity> qw3 = Wrappers.query();
-            qw3.eq("opp_name", opportunityBuffer.getOppbName()).eq("opp_cus_id", opportunityBuffer.getOppbCusId());
-            List<Opportunity> list2 = opportunityMapper.selectList(qw3);
-
-            // 这个客户已经存在该机会名称了，新增失败
-            if (!list1.isEmpty() || !list2.isEmpty()){
-                System.out.println("机会名称重复！");
-                respBean = RespBean.error(500, "机会名称重复！");
-                return respBean;
-            }
+//            // 同一个客户的机会名称不能有重复
+//            QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
+//            qw2.eq("oppb_name", opportunityBuffer.getOppbName()).eq("oppb_cus_id", opportunityBuffer.getOppbCusId());
+//            List<OpportunityBuffer> list1 = opportunityBufferMapper.selectList(qw2);
+//            QueryWrapper<Opportunity> qw3 = Wrappers.query();
+//            qw3.eq("opp_name", opportunityBuffer.getOppbName()).eq("opp_cus_id", opportunityBuffer.getOppbCusId());
+//            List<Opportunity> list2 = opportunityMapper.selectList(qw3);
+//
+//            // 这个客户已经存在该机会名称了，新增失败
+//            if (!list1.isEmpty() || !list2.isEmpty()){
+//                System.out.println("机会名称重复！");
+//                respBean = RespBean.error(500, "机会名称重复！");
+//                return respBean;
+//            }
             // 判断是保存了还是提交了
             if (addOpportunityInfo.getType().equals("0")){
                 // 将机会状态设为"10"（草稿）
@@ -151,9 +171,36 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
     }
 
 
+    @Override
+    public RespBean testUpdateRepetition(String oppbName, String cusId, String oppbId) {
+        RespBean respBean = null;
+        // 机会名称不能重复
+        QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
+        qw2.eq("oppb_name", oppbName).eq("oppb_cus_id", cusId);
+        List<OpportunityBuffer> list1 = opportunityBufferMapper.selectList(qw2);
+        QueryWrapper<Opportunity> qw3 = Wrappers.query();
+        qw3.eq("opp_name", oppbName).eq("opp_cus_id", cusId);
+        List<Opportunity> list2 = opportunityMapper.selectList(qw3);
+        OpportunityBuffer op = opportunityBufferMapper.selectById(oppbId);
+
+        // 这个客户已经存在该机会名称了，新增失败
+        boolean f0 = oppbName.equals(op.getOppbName());
+        if (!f0){
+            if (!list1.isEmpty() || !list2.isEmpty()){
+
+                System.out.println("机会名称重复！");
+                respBean = RespBean.error(500, "机会名称重复！");
+                return respBean;
+            }
+        }
+        respBean = RespBean.error(200, "ok");
+        return respBean;
+    }
 
     @Override
     public RespBean updateOpportunity(UpdateOpportunityInfo updateOpportunityInfo) {
+        // 保存 or 提交
+        String type = updateOpportunityInfo.getType();
         // 普通表信息
         Opportunity opportunity = updateOpportunityInfo.getOpportunity();
         List<SubOpportunity> updateSubOpportunityList = updateOpportunityInfo.getUpdateSubOpportunityList();
@@ -169,77 +216,169 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
         String msg = "";
         opportunityBuffer.setOppbOppId(opportunity.getOppId());
 
-        // 判断本次修改是否需要审批
-        // 逆向修改机会阶段需要进入审批流程, 机会归属修改后要审批
-        // 获取原始的机会阶段和机会归属
-        String[] oppPhases = {"E","D","C","B","A","S"};
-        List<String> oppPhaseList = Arrays.asList(oppPhases);
-        Opportunity testOpp = opportunityMapper.selectById(opportunity.getOppId());
-        if (!testOpp.getOppBelonging().equals(opportunity.getOppBelonging()) || oppPhaseList.indexOf(testOpp.getOppPhase()) > oppPhaseList.indexOf(opportunity.getOppPhase())){
-            System.out.println("需要审批");
-            // 需要审批
-            // 直接insert到缓存表
-            AddOpportunityInfo addOpportunityInfo = new AddOpportunityInfo();
-            addOpportunityInfo.setOpportunityBuffer(opportunityBuffer);
-            System.out.println("=========================");
-            System.out.println(opportunityBuffer);
-            addOpportunityInfo.setSubOpportunityBufferList(subOpportunityBufferList);
-            addOpportunityInfo.setCompetitorBufferList(competitorBufferList);
-            addOpportunityInfo.setPayerBufferList(payerBufferList);
-            respBean = iOpportunityBufferService.addOpportunity(addOpportunityInfo);
-        }
-        else {
-            System.out.println("不需要审批");
-            // 不需要审批
-            // 直接update原表
-            List<SubOpportunity> addSubOpportunityList = new ArrayList<>();
-            List<SubOpportunity> updatedSubOpportunityList = new ArrayList<>();
-            List<Competitor> addCompetitorList = new ArrayList<>();
-            List<Payer> addPayerList = new ArrayList<>();
+        /**
+         *机会修改：
+         *  判断修改机会的状态（草稿，退回，正常）
+         *  对于草稿和退回这两种机会，因为这时机会还没有审批通过，因此修改后需要更新到缓存表中
+         *  草稿修改后仍可以进行保存，而退回的机会在修改后只能提交
+         *  对于正常状态的机会，还需要判断是否修改了机会归属或者机会阶段，以此来判断是否需要进行审批
+         *  如果需要审批，则将这些修改信息insert到缓存表中，反之则可以直接update机会表
+         */
 
-            for (SubOpportunity s : updateSubOpportunityList) {
-                if (s.getSubOppId() == null){
-                    addSubOpportunityList.add(s);
+        // 草稿或退回的机会
+        if (opportunity.getOppId() == null){
+            // 判断是草稿还是退回的机会
+            // 草稿
+            if (opportunityBuffer.getOppbStatus().equals("10")){
+//                // 机会名称不能重复
+//                QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
+//                qw2.eq("oppb_name", opportunityBuffer.getOppbName()).eq("oppb_cus_id", opportunityBuffer.getOppbCusId());
+//                List<OpportunityBuffer> list1 = opportunityBufferMapper.selectList(qw2);
+//                QueryWrapper<Opportunity> qw3 = Wrappers.query();
+//                qw3.eq("opp_name", opportunityBuffer.getOppbName()).eq("opp_cus_id", opportunityBuffer.getOppbCusId());
+//                List<Opportunity> list2 = opportunityMapper.selectList(qw3);
+//                OpportunityBuffer op = opportunityBufferMapper.selectById(opportunityBuffer.getOppbId());
+//
+//                // 这个客户已经存在该机会名称了，新增失败
+//                boolean f0 = opportunityBuffer.getOppbName().equals(op.getOppbName());
+//                if (!f0){
+//                    if (!list1.isEmpty() || !list2.isEmpty()){
+//
+//                        System.out.println("机会名称重复！");
+//                        respBean = RespBean.error(500, "机会名称重复！");
+//                        return respBean;
+//                    }
+//                }
+
+                // 提交
+                if (type.equals("1")) {
+                    opportunityBuffer.setOppbStatus("20");
+                    msg = "机会修改已提交，请等待审批通过！";
                 }else {
-                    updatedSubOpportunityList.add(s);
+                    msg = "机会保存草稿成功！";
                 }
             }
-            for (Competitor c : updateCompetitorList) {
-                if (c.getCompId() == null){
-                    addCompetitorList.add(c);
-                }
+            // 退回
+            else {
+                opportunityBuffer.setOppbStatus("20");
+                msg = "机会修改已提交，请等待审批通过！";
             }
-            for (Payer p : updatePayerList) {
-                if (p.getpId() == null){
-                    addPayerList.add(p);
+
+            // 更新缓存机会表
+            opportunityBufferMapper.updateById(opportunityBuffer);
+
+            // 更新缓存子机会表
+            for (SubOpportunityBuffer s : subOpportunityBufferList) {
+                // 新增
+                if (s.getSubOppbId() == null){
+                    s.setSubOppbOppId(opportunityBuffer.getOppbId());
+                    subOpportunityBufferMapper.insert(s);
+                }
+                // 修改
+                else {
+                    subOpportunityBufferMapper.updateById(s);
                 }
             }
 
-            try{
-                // 更新机会表
-                opportunityMapper.updateById(opportunity);
-                // 新增子机会表
-                for (SubOpportunity s : addSubOpportunityList) {
-                    subOpportunityMapper.insert(s);
+            // 更新缓存竞争情况表
+            for (CompetitorBuffer c : competitorBufferList) {
+                // 新增
+                if (c.getCompbId() == null){
+                    c.setCompbOppId(opportunityBuffer.getOppbId());
+                    competitorBufferMapper.insert(c);
                 }
-                // 更新子机会表
-                for (SubOpportunity s : updatedSubOpportunityList) {
-                    subOpportunityMapper.updateById(s);
-                }
-                // 新增竞争情况表
-                for (Competitor c : addCompetitorList) {
-                    competitorMapper.insert(c);
-                }
-                // 新增购买决策人表
-                for (Payer p : addPayerList) {
-                    payerMapper.insert(p);
-                }
-            }catch (Exception e){
-                System.out.println("update fail!");
-                throw e;
             }
 
-            respBean = RespBean.ok(200,"机会修改成功！");
+            // 更新缓存竞争情况表
+            for (PayerBuffer p : payerBufferList) {
+                // 新增
+                if (p.getPbId() == null){
+                    p.setPbOppId(opportunityBuffer.getOppbId());
+                    payerBufferMapper.insert(p);
+                }
+            }
+
+            respBean = RespBean.ok(200, msg);
+
+        }
+
+
+        // 正常机会
+        else {
+            // 判断本次修改是否需要审批
+            // 逆向修改机会阶段需要进入审批流程, 机会归属修改后要审批
+            // 获取原始的机会阶段和机会归属
+            String[] oppPhases = {"E","D","C","B","A","S"};
+            List<String> oppPhaseList = Arrays.asList(oppPhases);
+            Opportunity testOpp = opportunityMapper.selectById(opportunity.getOppId());
+            if (!testOpp.getOppBelonging().equals(opportunity.getOppBelonging()) || oppPhaseList.indexOf(testOpp.getOppPhase()) > oppPhaseList.indexOf(opportunity.getOppPhase())){
+                System.out.println("需要审批");
+                // 需要审批
+                // 直接insert到缓存表
+                AddOpportunityInfo addOpportunityInfo = new AddOpportunityInfo();
+                opportunityBuffer.setOppbOppId(opportunity.getOppId());
+                addOpportunityInfo.setOpportunityBuffer(opportunityBuffer);
+                System.out.println("=========================");
+                System.out.println(opportunityBuffer);
+                addOpportunityInfo.setSubOpportunityBufferList(subOpportunityBufferList);
+                addOpportunityInfo.setCompetitorBufferList(competitorBufferList);
+                addOpportunityInfo.setPayerBufferList(payerBufferList);
+                respBean = iOpportunityBufferService.addOpportunity(addOpportunityInfo);
+            }
+            else {
+                System.out.println("不需要审批");
+                // 不需要审批
+                // 直接update原表
+                List<SubOpportunity> addSubOpportunityList = new ArrayList<>();
+                List<SubOpportunity> updatedSubOpportunityList = new ArrayList<>();
+                List<Competitor> addCompetitorList = new ArrayList<>();
+                List<Payer> addPayerList = new ArrayList<>();
+
+                for (SubOpportunity s : updateSubOpportunityList) {
+                    if (s.getSubOppId() == null){
+                        addSubOpportunityList.add(s);
+                    }else {
+                        updatedSubOpportunityList.add(s);
+                    }
+                }
+                for (Competitor c : updateCompetitorList) {
+                    if (c.getCompId() == null){
+                        addCompetitorList.add(c);
+                    }
+                }
+                for (Payer p : updatePayerList) {
+                    if (p.getpId() == null){
+                        addPayerList.add(p);
+                    }
+                }
+
+                try{
+                    // 更新机会表
+                    opportunityMapper.updateById(opportunity);
+                    // 新增子机会表
+                    for (SubOpportunity s : addSubOpportunityList) {
+                        subOpportunityMapper.insert(s);
+                    }
+                    // 更新子机会表
+                    for (SubOpportunity s : updatedSubOpportunityList) {
+                        subOpportunityMapper.updateById(s);
+                    }
+                    // 新增竞争情况表
+                    for (Competitor c : addCompetitorList) {
+                        competitorMapper.insert(c);
+                    }
+                    // 新增购买决策人表
+                    for (Payer p : addPayerList) {
+                        payerMapper.insert(p);
+                    }
+                }catch (Exception e){
+                    System.out.println("update fail!");
+                    throw e;
+                }
+
+                respBean = RespBean.ok(200,"机会修改成功！");
+            }
+
         }
 
         return respBean;
