@@ -3,10 +3,12 @@ package com.neu.opportunitymanagement.oppManagement.controller;
 
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
+import com.neu.opportunitymanagement.oppManagement.dto.tracklog.UpdateTrackInfo;
 import com.neu.opportunitymanagement.oppManagement.entity.Employee;
 import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityBufferService;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
+import com.neu.opportunitymanagement.oppManagement.service.ITrackinglogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,8 @@ public class OpportunityController {
     IOpportunityService iOpportunityService;
     @Autowired
     IOpportunityBufferService iOpportunityBufferService;
+    @Autowired
+    ITrackinglogService iTrackinglogService;
 
 
 
@@ -128,6 +132,31 @@ public class OpportunityController {
         }
         return respBean;
     }
+
+
+    // 机会跟踪页面初始化
+    @GetMapping("getOppTrackMainPage")
+    public RespBean getOppTrackMainPage(@RequestParam String oppId){
+        return iOpportunityService.getOppTrackMainPage(oppId);
+    }
+
+
+    // 增删改机会跟踪记录
+    @PostMapping("curdTrackinglog")
+    public RespBean curdTrackinglog(@RequestBody UpdateTrackInfo updateTrackInfo){
+        RespBean respBean = null;
+        try {
+            respBean = iTrackinglogService.curdTrackinglog(updateTrackInfo);
+        }catch (Exception e){
+            respBean = RespBean.error(500, "系统错误，请联系管理员...");
+        }
+        return respBean;
+    }
+
+
+    // 机会审批
+    
+
 
 
 

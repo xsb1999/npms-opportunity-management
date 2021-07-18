@@ -44,6 +44,9 @@ public interface IOpportunityService extends IService<Opportunity> {
     // 点击“修改”按钮，显示修改页面
     public RespBean showUpdatePage(OppIdAndOppBId oppIdAndOppBId);
 
+    // 机会跟踪页面初始化
+    public RespBean getOppTrackMainPage(String oppId);
+
 
 
 

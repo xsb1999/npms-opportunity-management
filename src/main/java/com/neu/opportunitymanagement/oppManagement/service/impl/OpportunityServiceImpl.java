@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
+import com.neu.opportunitymanagement.oppManagement.dto.tracklog.OppTrackMainPage;
 import com.neu.opportunitymanagement.oppManagement.entity.*;
 import com.neu.opportunitymanagement.oppManagement.mapper.*;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
@@ -11,8 +12,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.image.RasterFormatException;
-import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -295,6 +294,29 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
         }
 
         RespBean respBean = RespBean.ok(200, "ok", updatePageInfo);
+        return respBean;
+    }
+
+    @Override
+    public RespBean getOppTrackMainPage(String oppId) {
+        RespBean respBean = null;
+        if (oppId == null || oppId == ""){
+            respBean = RespBean.error(500, "该机会还未创建成功，无法进行跟踪！");
+            return respBean;
+        }
+        Opportunity opp = opportunityMapper.selectById(oppId);
+        String oppName = opp.getOppName();
+        List<Trackinglog> oppTrackList;
+        QueryWrapper<Trackinglog> qw = Wrappers.query();
+        qw.eq("t_opp_id", oppId);
+        oppTrackList = trackinglogMapper.selectList(qw);
+
+        OppTrackMainPage oppTrackMainPage = new OppTrackMainPage();
+        oppTrackMainPage.setOppId(oppId);
+        oppTrackMainPage.setOppName(oppName);
+        oppTrackMainPage.setOppTrackList(oppTrackList);
+
+        respBean = RespBean.ok(200, "ok", oppTrackMainPage);
         return respBean;
     }
 

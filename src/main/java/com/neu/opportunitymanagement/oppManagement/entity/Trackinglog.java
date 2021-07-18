@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xsb
@@ -24,7 +24,7 @@ public class Trackinglog implements Serializable {
 
     private String tType;
 
-    private LocalDateTime tDate;
+    private String tDate;
 
     private String tOurParty;
 
@@ -65,11 +65,11 @@ public class Trackinglog implements Serializable {
         this.tType = tType;
     }
 
-    public LocalDateTime gettDate() {
+    public String gettDate() {
         return tDate;
     }
 
-    public void settDate(LocalDateTime tDate) {
+    public void settDate(String tDate) {
         this.tDate = tDate;
     }
 
@@ -132,17 +132,17 @@ public class Trackinglog implements Serializable {
     @Override
     public String toString() {
         return "Trackinglog{" +
-        "tId=" + tId +
-        ", tOppId=" + tOppId +
-        ", tType=" + tType +
-        ", tDate=" + tDate +
-        ", tOurParty=" + tOurParty +
-        ", tCusParty=" + tCusParty +
-        ", tThirdParty=" + tThirdParty +
-        ", tContactWay=" + tContactWay +
-        ", tPlace=" + tPlace +
-        ", tContactCondition=" + tContactCondition +
-        ", tContactEffect=" + tContactEffect +
-        "}";
+                "tId=" + tId +
+                ", tOppId='" + tOppId + '\'' +
+                ", tType='" + tType + '\'' +
+                ", tDate='" + tDate + '\'' +
+                ", tOurParty='" + tOurParty + '\'' +
+                ", tCusParty='" + tCusParty + '\'' +
+                ", tThirdParty='" + tThirdParty + '\'' +
+                ", tContactWay='" + tContactWay + '\'' +
+                ", tPlace='" + tPlace + '\'' +
+                ", tContactCondition='" + tContactCondition + '\'' +
+                ", tContactEffect='" + tContactEffect + '\'' +
+                '}';
     }
 }

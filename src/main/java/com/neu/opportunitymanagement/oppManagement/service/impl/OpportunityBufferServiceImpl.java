@@ -198,6 +198,7 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
     }
 
     @Override
+    @Transactional(rollbackFor=Exception.class)
     public RespBean updateOpportunity(UpdateOpportunityInfo updateOpportunityInfo) {
         // 保存 or 提交
         String type = updateOpportunityInfo.getType();
@@ -264,38 +265,43 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
                 msg = "机会修改已提交，请等待审批通过！";
             }
 
-            // 更新缓存机会表
-            opportunityBufferMapper.updateById(opportunityBuffer);
+            try {
+                // 更新缓存机会表
+                opportunityBufferMapper.updateById(opportunityBuffer);
 
-            // 更新缓存子机会表
-            for (SubOpportunityBuffer s : subOpportunityBufferList) {
-                // 新增
-                if (s.getSubOppbId() == null){
-                    s.setSubOppbOppId(opportunityBuffer.getOppbId());
-                    subOpportunityBufferMapper.insert(s);
+                // 更新缓存子机会表
+                for (SubOpportunityBuffer s : subOpportunityBufferList) {
+                    // 新增
+                    if (s.getSubOppbId() == null){
+                        s.setSubOppbOppId(opportunityBuffer.getOppbId());
+                        subOpportunityBufferMapper.insert(s);
+                    }
+                    // 修改
+                    else {
+                        subOpportunityBufferMapper.updateById(s);
+                    }
                 }
-                // 修改
-                else {
-                    subOpportunityBufferMapper.updateById(s);
-                }
-            }
 
-            // 更新缓存竞争情况表
-            for (CompetitorBuffer c : competitorBufferList) {
-                // 新增
-                if (c.getCompbId() == null){
-                    c.setCompbOppId(opportunityBuffer.getOppbId());
-                    competitorBufferMapper.insert(c);
+                // 更新缓存竞争情况表
+                for (CompetitorBuffer c : competitorBufferList) {
+                    // 新增
+                    if (c.getCompbId() == null){
+                        c.setCompbOppId(opportunityBuffer.getOppbId());
+                        competitorBufferMapper.insert(c);
+                    }
                 }
-            }
 
-            // 更新缓存竞争情况表
-            for (PayerBuffer p : payerBufferList) {
-                // 新增
-                if (p.getPbId() == null){
-                    p.setPbOppId(opportunityBuffer.getOppbId());
-                    payerBufferMapper.insert(p);
+                // 更新缓存竞争情况表
+                for (PayerBuffer p : payerBufferList) {
+                    // 新增
+                    if (p.getPbId() == null){
+                        p.setPbOppId(opportunityBuffer.getOppbId());
+                        payerBufferMapper.insert(p);
+                    }
                 }
+            }catch (Exception e){
+                System.out.println("update fail!");
+                throw e;
             }
 
             respBean = RespBean.ok(200, msg);
