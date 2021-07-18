@@ -1,16 +1,27 @@
 package com.neu.opportunitymanagement;
 
+import com.neu.opportunitymanagement.oppManagement.dto.approval.Flow;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
+import com.neu.opportunitymanagement.oppManagement.mapper.OpportunityBufferMapper;
 import com.neu.opportunitymanagement.oppManagement.mapper.OpportunityMapper;
+import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 class OpportunityManagementApplicationTests {
 
     @Autowired
     OpportunityMapper opportunityMapper;
+    @Autowired
+    OpportunityBufferMapper opportunityBufferMapper;
+    @Autowired
+    IOpportunityService iOpportunityService;
+
 
     @Test
     void contextLoads() {
@@ -31,7 +42,17 @@ class OpportunityManagementApplicationTests {
         System.out.println(opportunityMapper.getOpportunityB(condition));
     }
 
+    @Test
+    public void test3(){
+        List<Flow> flowList = new ArrayList<>();
+        flowList = opportunityBufferMapper.getApproveOppList("20000010");
+        System.out.println(flowList);
+    }
 
+    @Test
+    public void test4(){
+        System.out.println(iOpportunityService.showOppApproveDetail("1"));
+    }
 
 
 

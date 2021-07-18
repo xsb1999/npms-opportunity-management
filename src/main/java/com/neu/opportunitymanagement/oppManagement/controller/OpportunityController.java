@@ -1,6 +1,7 @@
 package com.neu.opportunitymanagement.oppManagement.controller;
 
 
+import com.neu.opportunitymanagement.oppManagement.dto.approval.Approval;
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
 import com.neu.opportunitymanagement.oppManagement.dto.tracklog.UpdateTrackInfo;
@@ -154,9 +155,31 @@ public class OpportunityController {
     }
 
 
-    // 机会审批
-    
+    // 机会审批页面初始化
+    @GetMapping("getApprovalPage")
+    public RespBean getApprovalPage(@RequestParam String empPositionId){
+        return iOpportunityService.getApprovalPage(empPositionId);
+    }
 
+
+    // 点击“审批”按钮，显示机会审批信息
+    @GetMapping("showOppApproveDetail")
+    public RespBean showOppApproveDetail(@RequestParam String oppIdB){
+        return iOpportunityService.showOppApproveDetail(oppIdB);
+    }
+
+
+    // 提交审批意见
+    @PostMapping("approval")
+    public RespBean approval(@RequestBody Approval approval){
+        RespBean respBean = null;
+        try {
+            respBean = iOpportunityService.approval(approval);
+        }catch (Exception e){
+            respBean = RespBean.error(500, "系统错误，请联系管理员...");
+        }
+        return respBean;
+    }
 
 
 

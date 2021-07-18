@@ -2,6 +2,9 @@ package com.neu.opportunitymanagement.oppManagement.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.neu.opportunitymanagement.oppManagement.dto.approval.Approval;
+import com.neu.opportunitymanagement.oppManagement.dto.approval.ApproveDetail;
+import com.neu.opportunitymanagement.oppManagement.dto.approval.Flow;
 import com.neu.opportunitymanagement.oppManagement.dto.common.*;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.*;
 import com.neu.opportunitymanagement.oppManagement.dto.tracklog.OppTrackMainPage;
@@ -11,6 +14,8 @@ import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sun.plugin.javascript.navig.LinkArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +51,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     CompetitorBufferMapper competitorBufferMapper;
     @Autowired
     PayerBufferMapper payerBufferMapper;
+    @Autowired
+    ApprovallogMapper approvallogMapper;
+    @Autowired
+    CustomerMapper customerMapper;
 
 
 
@@ -318,6 +327,291 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
 
         respBean = RespBean.ok(200, "ok", oppTrackMainPage);
         return respBean;
+    }
+
+    @Override
+    public RespBean getApprovalPage(String empPositionId) {
+        List<Flow> flowList = opportunityBufferMapper.getApproveOppList(empPositionId);
+        for (Flow flow : flowList) {
+            if (flow.getOppId() == null){
+                flow.setFlowName("机会新增流程");
+            }else {
+                flow.setFlowName("机会修改流程");
+            }
+        }
+        return RespBean.ok(200, "ok", flowList);
+    }
+
+    @Override
+    public RespBean showOppApproveDetail(String oppIdB) {
+        // 获取缓存表中的机会
+        OpportunityBuffer opportunityBuffer = opportunityBufferMapper.selectById(oppIdB);
+        // 获取子机会列表
+        QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+        qw1.eq("sub_oppb_opp_id", oppIdB);
+        List<SubOpportunityBuffer> subOpportunityBufferList = subOpportunityBufferMapper.selectList(qw1);
+        // 获取竞争情况列表
+        QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+        qw2.eq("compb_opp_id", oppIdB);
+        List<CompetitorBuffer> competitorBufferList = competitorBufferMapper.selectList(qw2);
+        // 获取购买决策人列表
+        QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+        qw3.eq("pb_opp_id", oppIdB);
+        List<PayerBuffer> payerBufferList = payerBufferMapper.selectList(qw3);
+
+        String oppId = opportunityBuffer.getOppbOppId();
+        // 获取机会跟踪记录列表
+        QueryWrapper<Trackinglog> qw4 = Wrappers.query();
+        qw4.eq("t_opp_id", oppId);
+        List<Trackinglog> trackinglogList = trackinglogMapper.selectList(qw4);
+        // 获取机会审批日志列表
+        QueryWrapper<Approvallog> qw5 = Wrappers.query();
+        qw5.eq("app_opp_id", oppIdB);
+        List<Approvallog> approvallogList = approvallogMapper.selectList(qw5);
+        // 获取客户信息
+        Customer customer = customerMapper.selectById(opportunityBuffer.getOppbCusId());
+
+        ApproveDetail approveDetail = new ApproveDetail();
+        approveDetail.setOpportunityBuffer(opportunityBuffer);
+        approveDetail.setSubOpportunityBufferList(subOpportunityBufferList);
+        approveDetail.setCompetitorBufferList(competitorBufferList);
+        approveDetail.setPayerBufferList(payerBufferList);
+        approveDetail.setTrackinglogList(trackinglogList);
+        approveDetail.setApprovallogList(approvallogList);
+        approveDetail.setCustomer(customer);
+
+        RespBean respBean = RespBean.ok(200, "ok", approveDetail);
+        return respBean;
+    }
+
+    @Override
+    @Transactional(rollbackFor=Exception.class)
+    public RespBean approval(Approval approval) {
+        String empName = approval.getEmpName();
+        String empPositionId = approval.getEmpPositionId();
+        int oppIdB = approval.getOppIdB();
+        String approveResult = approval.getApproveResult();
+        String approveAdvice = approval.getApproveAdvice();
+
+        // 判断当前审批人（营销副总 or 事业部总经理 or 销售总监）
+        if (empPositionId.equals("20000010")){
+            // 营销副总
+            if (approveResult.equals("-1")){
+                // 拒绝
+                // 直接删除缓存表中的数据
+                QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+                qw1.eq("sub_oppb_opp_id", oppIdB);
+                subOpportunityBufferMapper.delete(qw1);
+
+                QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+                qw2.eq("compb_opp_id", oppIdB);
+                competitorBufferMapper.delete(qw2);
+
+                QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+                qw3.eq("pb_opp_id", oppIdB);
+                payerBufferMapper.delete(qw3);
+
+                opportunityBufferMapper.deleteById(oppIdB);
+            }
+
+            if (approveResult.equals("0")){
+                // 退回
+                // 修改缓存机会表中该机会的状态为60(退回状态)，并新增审批日志
+                OpportunityBuffer opb = opportunityBufferMapper.selectById(oppIdB);
+                opb.setOppbStatus("60");
+                opportunityBufferMapper.updateById(opb);
+                Approvallog approvallog = new Approvallog();
+                approvallog.setAppFlowName("机会新增流程");
+                approvallog.setAppPeople(empName);
+                approvallog.setAppOpinion(approveAdvice);
+                approvallog.setAppStatus("初始");
+                approvallog.setAppResult("退回");
+                approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
+                approvallog.setAppId(oppIdB);
+                // 写入审批日志表
+                approvallogMapper.insert(approvallog);
+            }
+
+            if (approveResult.equals("1")){
+                // 同意
+                // 修改缓存机会表中该机会的审批状态为1，并新增审批日志
+                OpportunityBuffer opb = opportunityBufferMapper.selectById(oppIdB);
+                opb.setOppbApproveStatus("1");
+                opportunityBufferMapper.updateById(opb);
+                Approvallog approvallog = new Approvallog();
+                approvallog.setAppFlowName("机会新增流程");
+                approvallog.setAppPeople(empName);
+                approvallog.setAppOpinion(approveAdvice);
+                approvallog.setAppStatus("初始");
+                approvallog.setAppResult("同意");
+                approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
+                approvallog.setAppId(oppIdB);
+                // 写入审批日志表
+                approvallogMapper.insert(approvallog);
+            }
+        }
+
+        if (empPositionId.equals("10000030") || empPositionId.equals("30000010")){
+            // 事业部总经理或销售总监
+            if (approveResult.equals("-1")){
+                // 拒绝
+                // 判断是新增机会还是修改机会
+                OpportunityBuffer opb = opportunityBufferMapper.selectById(oppIdB);
+                if (opb.getOppbOppId() != null){
+                    // 修改机会（需要修改机会表中该机会的状态为“正常"）
+                    Opportunity oppo = opportunityMapper.selectById(opb.getOppbOppId());
+                    oppo.setOppStatus("30");
+                    opportunityMapper.updateById(oppo);
+                }
+                // 直接删除缓存表中的数据
+                QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+                qw1.eq("sub_oppb_opp_id", oppIdB);
+                subOpportunityBufferMapper.delete(qw1);
+
+                QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+                qw2.eq("compb_opp_id", oppIdB);
+                competitorBufferMapper.delete(qw2);
+
+                QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+                qw3.eq("pb_opp_id", oppIdB);
+                payerBufferMapper.delete(qw3);
+
+                opportunityBufferMapper.deleteById(oppIdB);
+            }
+
+            if (approveResult.equals("0")){
+                // 退回
+                // 判断是新增机会还是修改机会
+                OpportunityBuffer opb = opportunityBufferMapper.selectById(oppIdB);
+                Approvallog approvallog = new Approvallog();
+                if (opb.getOppbOppId() == null){
+                    // 新增机会，需要将机会审批状态设为0
+                    opb.setOppbApproveStatus("0");
+                    approvallog.setAppFlowName("机会新增流程");
+                    approvallog.setAppStatus("复审");
+                }else {
+                    approvallog.setAppFlowName("机会修改流程");
+                    approvallog.setAppStatus("初始");
+                }
+                // 修改缓存机会表中该机会的状态为60(退回状态)，并新增审批日志
+                opb.setOppbStatus("60");
+                opportunityBufferMapper.updateById(opb);
+                approvallog.setAppPeople(empName);
+                approvallog.setAppOpinion(approveAdvice);
+                approvallog.setAppResult("退回");
+                approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
+                approvallog.setAppId(oppIdB);
+                // 写入审批日志表
+                approvallogMapper.insert(approvallog);
+            }
+
+            if (approveResult.equals("1")){
+                // 同意
+                // 判断是新增机会还是修改机会
+                OpportunityBuffer opb = opportunityBufferMapper.selectById(oppIdB);
+                if (opb.getOppbOppId() == null){
+                    // 新增机会
+                    // 实例化4个表的信息
+                    Opportunity opp = new Opportunity();
+                    List<SubOpportunity> subOpportunityList = new ArrayList<>();
+                    List<Competitor> competitorList = new ArrayList<>();
+                    List<Payer> payerList = new ArrayList<>();
+
+                    // 1. 生成机会id，并将机会信息从缓存表转移到普通表中
+                    String max_opp_id = opportunityMapper.getMaxOppId();
+                    String new_opp_id = (Integer.parseInt(max_opp_id)+1) + "";
+
+                    opp.setOppId(new_opp_id);
+                    opp.setOppName(opb.getOppbName());
+                    opp.setOppSalesDept(opb.getOppbSalesDept());
+                    opp.setOppCustomerManagerId(opb.getOppbCustomerManagerId());
+                    opp.setOppSignTime(opb.getOppbSignTime());
+                    opp.setOppBelonging(opb.getOppbBelonging());
+                    opp.setOppStatus("30");
+                    opp.setOppPhase(opb.getOppbPhase());
+                    opp.setOppType(opb.getOppbType());
+                    opp.setOppProduct(opb.getOppbProduct());
+                    opp.setOppBackground(opb.getOppbBackground());
+                    opp.setOppCigarettes(opb.getOppbCigarettes());
+                    opp.setOppCusId(opb.getOppbCusId());
+                    opp.setOppOrigin(opb.getOppbOrigin());
+
+                    // 2. 生成子机会id，并将子机会信息从缓存表转移到普通表中
+                    QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+                    qw1.eq("sub_oppb_opp_id", oppIdB);
+                    List<SubOpportunityBuffer> subOpportunityBufferList = subOpportunityBufferMapper.selectList(qw1);
+                    for (int i = 0; i < subOpportunityBufferList.size(); i++) {
+                        SubOpportunity s = new SubOpportunity();
+                        if (i < 10){
+                            s.setSubOppId(new_opp_id+"0"+i);
+                        }else {
+                            s.setSubOppId(new_opp_id+i);
+                        }
+                        s.setSubOppName(subOpportunityBufferList.get(i).getSubOppbName());
+                        s.setSubOppType(subOpportunityBufferList.get(i).getSubOppbType());
+                        s.setSubOppProduct(subOpportunityBufferList.get(i).getSubOppbProduct());
+                        s.setSubOppDept(subOpportunityBufferList.get(i).getSubOppbDept());
+                        s.setSubOppCurrency(subOpportunityBufferList.get(i).getSubOppbCurrency());
+                        s.setSubOppMoney(subOpportunityBufferList.get(i).getSubOppbMoney());
+                        s.setSubOppOppId(new_opp_id);
+                        s.setSubOppStatus("30");
+                        subOpportunityList.add(s);
+                    }
+
+                    // 3. 将竞争情况信息从缓存表转移到普通表中
+
+
+
+
+
+
+                    // 4. 将购买决策人信息从缓存表转移到普通表中
+
+
+
+
+
+
+
+
+
+                }
+                else {
+                    // 修改机会
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return null;
     }
 
 

@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -105,14 +107,21 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
                 // 将机会状态设为“20”（流程中）
                 opportunityBuffer.setOppbStatus("20");
             }
+            // 将机会审批状态设为"0"（0人审批通过）
+            opportunityBuffer.setOppbApproveStatus("0");
         }else {
             opportunityBuffer.setOppbStatus("20");
+            // 将机会审批状态设为"1"（修改机会时不需要营销副总审批，因此直接设为1）
+            opportunityBuffer.setOppbApproveStatus("1");
         }
 
         // 因为在修改机会时，如果需要审批，则需要将信息写入缓存表，就会调用addOpportunity这个方法
 
-        // 将机会审批状态设为"0"（0人审批通过）
-        opportunityBuffer.setOppbApproveStatus("0");
+        // 设置提交日期
+        Date date = new Date();
+        SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
+        String today = dateFormat.format(date);
+        opportunityBuffer.setOppbSubmitDate(today);
 
         // insert机会
         opportunityBufferMapper.insert(opportunityBuffer);
@@ -228,9 +237,16 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
 
         // 草稿或退回的机会
         if (opportunity.getOppId() == null){
+
             // 判断是草稿还是退回的机会
             // 草稿
-            if (opportunityBuffer.getOppbStatus().equals("10")){
+            OpportunityBuffer ob = opportunityBufferMapper.selectById(opportunityBuffer.getOppbId());
+            String oppStatus = ob.getOppbStatus();
+            if (oppStatus.equals("20")){
+                return RespBean.error(500, "该机会状态为流程中，不可修改！");
+            }
+
+            if (oppStatus.equals("10")){
 //                // 机会名称不能重复
 //                QueryWrapper<OpportunityBuffer> qw2 = Wrappers.query();
 //                qw2.eq("oppb_name", opportunityBuffer.getOppbName()).eq("oppb_cus_id", opportunityBuffer.getOppbCusId());
@@ -266,6 +282,11 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
             }
 
             try {
+                // 设置提交日期
+                Date date = new Date();
+                SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
+                String today = dateFormat.format(date);
+                opportunityBuffer.setOppbSubmitDate(today);
                 // 更新缓存机会表
                 opportunityBufferMapper.updateById(opportunityBuffer);
 
@@ -317,15 +338,27 @@ public class OpportunityBufferServiceImpl extends ServiceImpl<OpportunityBufferM
             String[] oppPhases = {"E","D","C","B","A","S"};
             List<String> oppPhaseList = Arrays.asList(oppPhases);
             Opportunity testOpp = opportunityMapper.selectById(opportunity.getOppId());
+            if (testOpp.getOppStatus().equals("20")){
+                return RespBean.error(500, "该机会状态为流程中，不可修改！");
+            }
+            if (testOpp.getOppStatus().equals("40")){
+                return RespBean.error(500, "该机会状态为暂停，不可修改！");
+            }
+            if (testOpp.getOppStatus().equals("50")){
+                return RespBean.error(500, "该机会状态为关闭，不可修改！");
+            }
+
             if (!testOpp.getOppBelonging().equals(opportunity.getOppBelonging()) || oppPhaseList.indexOf(testOpp.getOppPhase()) > oppPhaseList.indexOf(opportunity.getOppPhase())){
                 System.out.println("需要审批");
                 // 需要审批
-                // 直接insert到缓存表
+                // 先修改普通机会表中的机会状态为“流程中，再insert所有信息到缓存表
+                Opportunity opp = new Opportunity();
+                opp.setOppId(opportunity.getOppId());
+                opp.setOppStatus("20");
+                opportunityMapper.updateById(opp);
                 AddOpportunityInfo addOpportunityInfo = new AddOpportunityInfo();
                 opportunityBuffer.setOppbOppId(opportunity.getOppId());
                 addOpportunityInfo.setOpportunityBuffer(opportunityBuffer);
-                System.out.println("=========================");
-                System.out.println(opportunityBuffer);
                 addOpportunityInfo.setSubOpportunityBufferList(subOpportunityBufferList);
                 addOpportunityInfo.setCompetitorBufferList(competitorBufferList);
                 addOpportunityInfo.setPayerBufferList(payerBufferList);

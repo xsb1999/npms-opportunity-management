@@ -1,5 +1,6 @@
 package com.neu.opportunitymanagement.oppManagement.service;
 
+import com.neu.opportunitymanagement.oppManagement.dto.approval.Approval;
 import com.neu.opportunitymanagement.oppManagement.dto.common.EmpInfo;
 import com.neu.opportunitymanagement.oppManagement.dto.common.OppTypeInfo;
 import com.neu.opportunitymanagement.oppManagement.dto.common.ProductInfo;
@@ -10,6 +11,8 @@ import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppManagePage
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
 import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -46,6 +49,15 @@ public interface IOpportunityService extends IService<Opportunity> {
 
     // 机会跟踪页面初始化
     public RespBean getOppTrackMainPage(String oppId);
+
+    // 机会审批页面初始化
+    public RespBean getApprovalPage(String empPositionId);
+
+    // 点击“审批”按钮，显示机会审批信息
+    public RespBean showOppApproveDetail(String oppIdB);
+
+    // 提交审批意见
+    public RespBean approval(Approval approval);
 
 
 

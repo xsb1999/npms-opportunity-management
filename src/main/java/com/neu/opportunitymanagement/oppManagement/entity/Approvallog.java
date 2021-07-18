@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xsb
@@ -22,17 +22,19 @@ public class Approvallog implements Serializable {
 
     private String appFlowName;
 
-    private String appOppId;
+    private Integer appOppId;
 
     private String appSubmitPeople;
 
-    private LocalDateTime appSubmitDate;
+    private String appSubmitDate;
 
     private String appPeople;
 
     private String appStatus;
 
     private String appOpinion;
+
+    private String appResult;
 
 
     public Integer getAppId() {
@@ -51,11 +53,11 @@ public class Approvallog implements Serializable {
         this.appFlowName = appFlowName;
     }
 
-    public String getAppOppId() {
+    public Integer getAppOppId() {
         return appOppId;
     }
 
-    public void setAppOppId(String appOppId) {
+    public void setAppOppId(Integer appOppId) {
         this.appOppId = appOppId;
     }
 
@@ -67,11 +69,11 @@ public class Approvallog implements Serializable {
         this.appSubmitPeople = appSubmitPeople;
     }
 
-    public LocalDateTime getAppSubmitDate() {
+    public String getAppSubmitDate() {
         return appSubmitDate;
     }
 
-    public void setAppSubmitDate(LocalDateTime appSubmitDate) {
+    public void setAppSubmitDate(String appSubmitDate) {
         this.appSubmitDate = appSubmitDate;
     }
 
@@ -99,17 +101,26 @@ public class Approvallog implements Serializable {
         this.appOpinion = appOpinion;
     }
 
+    public String getAppResult() {
+        return appResult;
+    }
+
+    public void setAppResult(String appResult) {
+        this.appResult = appResult;
+    }
+
     @Override
     public String toString() {
         return "Approvallog{" +
-        "appId=" + appId +
-        ", appFlowName=" + appFlowName +
-        ", appOppId=" + appOppId +
-        ", appSubmitPeople=" + appSubmitPeople +
-        ", appSubmitDate=" + appSubmitDate +
-        ", appPeople=" + appPeople +
-        ", appStatus=" + appStatus +
-        ", appOpinion=" + appOpinion +
-        "}";
+                "appId=" + appId +
+                ", appFlowName='" + appFlowName + '\'' +
+                ", appOppId=" + appOppId +
+                ", appSubmitPeople='" + appSubmitPeople + '\'' +
+                ", appSubmitDate='" + appSubmitDate + '\'' +
+                ", appPeople='" + appPeople + '\'' +
+                ", appStatus='" + appStatus + '\'' +
+                ", appOpinion='" + appOpinion + '\'' +
+                ", appResult='" + appResult + '\'' +
+                '}';
     }
 }

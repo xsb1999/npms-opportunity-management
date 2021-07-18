@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xsb
@@ -49,6 +49,8 @@ public class OpportunityBuffer implements Serializable {
     private String oppbOppId;
 
     private String oppbOrigin;
+
+    private String oppbSubmitDate;
 
 
     public Integer getOppbId() {
@@ -179,25 +181,34 @@ public class OpportunityBuffer implements Serializable {
         this.oppbOrigin = oppbOrigin;
     }
 
+    public String getOppbSubmitDate() {
+        return oppbSubmitDate;
+    }
+
+    public void setOppbSubmitDate(String oppbSubmitDate) {
+        this.oppbSubmitDate = oppbSubmitDate;
+    }
+
     @Override
     public String toString() {
         return "OpportunityBuffer{" +
-        "oppbId=" + oppbId +
-        ", oppbName=" + oppbName +
-        ", oppbSalesDept=" + oppbSalesDept +
-        ", oppbCustomerManagerId=" + oppbCustomerManagerId +
-        ", oppbSignTime=" + oppbSignTime +
-        ", oppbBelonging=" + oppbBelonging +
-        ", oppbStatus=" + oppbStatus +
-        ", oppbPhase=" + oppbPhase +
-        ", oppbType=" + oppbType +
-        ", oppbProduct=" + oppbProduct +
-        ", oppbBackground=" + oppbBackground +
-        ", oppbCigarettes=" + oppbCigarettes +
-        ", oppbCusId=" + oppbCusId +
-        ", oppbApproveStatus=" + oppbApproveStatus +
-        ", oppbOppId=" + oppbOppId +
-        ", oppbOrigin=" + oppbOrigin +
-        "}";
+                "oppbId=" + oppbId +
+                ", oppbName='" + oppbName + '\'' +
+                ", oppbSalesDept='" + oppbSalesDept + '\'' +
+                ", oppbCustomerManagerId='" + oppbCustomerManagerId + '\'' +
+                ", oppbSignTime=" + oppbSignTime +
+                ", oppbBelonging='" + oppbBelonging + '\'' +
+                ", oppbStatus='" + oppbStatus + '\'' +
+                ", oppbPhase='" + oppbPhase + '\'' +
+                ", oppbType='" + oppbType + '\'' +
+                ", oppbProduct='" + oppbProduct + '\'' +
+                ", oppbBackground='" + oppbBackground + '\'' +
+                ", oppbCigarettes='" + oppbCigarettes + '\'' +
+                ", oppbCusId='" + oppbCusId + '\'' +
+                ", oppbApproveStatus='" + oppbApproveStatus + '\'' +
+                ", oppbOppId='" + oppbOppId + '\'' +
+                ", oppbOrigin='" + oppbOrigin + '\'' +
+                ", oppbSubmitDate='" + oppbSubmitDate + '\'' +
+                '}';
     }
 }

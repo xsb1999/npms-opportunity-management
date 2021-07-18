@@ -56,6 +56,8 @@ public interface OpportunityMapper extends BaseMapper<Opportunity> {
     // 机会查询（查询机会缓存表中的机会（在审批中的机会））
     public List<OppSearchResult> getOpportunityB(OppSearchCondition searchCondition);
 
+    // 获取当前机会表中最大的id
+    public String getMaxOppId();
 
 
 
