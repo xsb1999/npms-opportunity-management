@@ -13,6 +13,7 @@ import com.neu.opportunitymanagement.oppManagement.mapper.*;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.plugin.javascript.navig.LinkArray;
@@ -145,16 +146,19 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
         return oppManagePageInfo;
     }
 
+    @Cacheable(cacheNames="opp_getEmpByDept")
     @Override
     public List<EmpInfo> getEmpByDept(String dept_id) {
         return opportunityMapper.getEmpByDept(dept_id);
     }
 
+    @Cacheable(cacheNames="opp_getProductByType")
     @Override
     public List<ProductInfo> getProductByType(String type_id) {
         return opportunityMapper.getProductByType(type_id);
     }
 
+    @Cacheable(cacheNames="opp_getTypeByProduct")
     @Override
     public List<OppTypeInfo> getTypeByProduct(String pro_id) {
         return opportunityMapper.getTypeByProduct(pro_id);
