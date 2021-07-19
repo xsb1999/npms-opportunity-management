@@ -1,7 +1,10 @@
 package com.neu.opportunitymanagement;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.neu.opportunitymanagement.oppManagement.dto.approval.Flow;
 import com.neu.opportunitymanagement.oppManagement.dto.opportunity.OppSearchCondition;
+import com.neu.opportunitymanagement.oppManagement.entity.Opportunity;
 import com.neu.opportunitymanagement.oppManagement.mapper.OpportunityBufferMapper;
 import com.neu.opportunitymanagement.oppManagement.mapper.OpportunityMapper;
 import com.neu.opportunitymanagement.oppManagement.service.IOpportunityService;
@@ -54,6 +57,13 @@ class OpportunityManagementApplicationTests {
         System.out.println(iOpportunityService.showOppApproveDetail("1"));
     }
 
+
+    @Test
+    public void test5(){
+        QueryWrapper<Opportunity> qw = Wrappers.query();
+        qw.eq("opp_sales_dept", "8021140");
+        System.out.println(opportunityMapper.selectCount(qw));
+    }
 
 
 

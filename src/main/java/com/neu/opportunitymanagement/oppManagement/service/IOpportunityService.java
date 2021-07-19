@@ -57,7 +57,7 @@ public interface IOpportunityService extends IService<Opportunity> {
     public RespBean showOppApproveDetail(String oppIdB);
 
     // 提交审批意见
-    public RespBean approval(Approval approval);
+    public RespBean approval(Approval approval) throws Exception;
 
 
 

@@ -1,7 +1,5 @@
 package com.neu.opportunitymanagement.oppManagement.dto.approval;
 
-import org.springframework.data.relational.core.sql.In;
-
 import java.io.Serializable;
 
 public class Approval implements Serializable {

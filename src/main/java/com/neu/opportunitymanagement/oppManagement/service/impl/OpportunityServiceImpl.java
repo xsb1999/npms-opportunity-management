@@ -386,12 +386,13 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public RespBean approval(Approval approval) {
+    public RespBean approval(Approval approval) throws Exception{
         String empName = approval.getEmpName();
         String empPositionId = approval.getEmpPositionId();
         int oppIdB = approval.getOppIdB();
         String approveResult = approval.getApproveResult();
         String approveAdvice = approval.getApproveAdvice();
+        String msg = "";
 
         // 判断当前审批人（营销副总 or 事业部总经理 or 销售总监）
         if (empPositionId.equals("20000010")){
@@ -411,7 +412,12 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                 qw3.eq("pb_opp_id", oppIdB);
                 payerBufferMapper.delete(qw3);
 
+                QueryWrapper<Approvallog> qw4 = Wrappers.query();
+                qw4.eq("app_opp_id", oppIdB);
+                approvallogMapper.delete(qw4);
+
                 opportunityBufferMapper.deleteById(oppIdB);
+                msg = "已拒绝机会！";
             }
 
             if (approveResult.equals("0")){
@@ -427,9 +433,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                 approvallog.setAppStatus("初始");
                 approvallog.setAppResult("退回");
                 approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
-                approvallog.setAppId(oppIdB);
+                approvallog.setAppOppId(oppIdB);
                 // 写入审批日志表
                 approvallogMapper.insert(approvallog);
+                msg = "已退回机会！";
             }
 
             if (approveResult.equals("1")){
@@ -445,9 +452,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                 approvallog.setAppStatus("初始");
                 approvallog.setAppResult("同意");
                 approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
-                approvallog.setAppId(oppIdB);
+                approvallog.setAppOppId(oppIdB);
                 // 写入审批日志表
                 approvallogMapper.insert(approvallog);
+                msg = "已通过机会！";
             }
         }
 
@@ -476,7 +484,12 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                 qw3.eq("pb_opp_id", oppIdB);
                 payerBufferMapper.delete(qw3);
 
+                QueryWrapper<Approvallog> qw4 = Wrappers.query();
+                qw4.eq("app_opp_id", oppIdB);
+                approvallogMapper.delete(qw4);
+
                 opportunityBufferMapper.deleteById(oppIdB);
+                msg = "已拒绝机会！";
             }
 
             if (approveResult.equals("0")){
@@ -500,9 +513,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                 approvallog.setAppOpinion(approveAdvice);
                 approvallog.setAppResult("退回");
                 approvallog.setAppSubmitDate(opb.getOppbSubmitDate());
-                approvallog.setAppId(oppIdB);
+                approvallog.setAppOppId(oppIdB);
                 // 写入审批日志表
                 approvallogMapper.insert(approvallog);
+                msg = "已退回机会！";
             }
 
             if (approveResult.equals("1")){
@@ -557,61 +571,182 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
                         s.setSubOppStatus("30");
                         subOpportunityList.add(s);
                     }
-
                     // 3. 将竞争情况信息从缓存表转移到普通表中
-
-
-
-
-
-
+                    QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+                    qw2.eq("compb_opp_id", oppIdB);
+                    List<CompetitorBuffer> competitorBufferList = competitorBufferMapper.selectList(qw2);
+                    for (CompetitorBuffer c : competitorBufferList) {
+                        Competitor competitor = new Competitor();
+                        competitor.setCompName(c.getCompbName());
+                        competitor.setCompOppId(new_opp_id);
+                        competitor.setCompPosition(c.getCompbPosition());
+                        competitorList.add(competitor);
+                    }
                     // 4. 将购买决策人信息从缓存表转移到普通表中
+                    QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+                    qw3.eq("pb_opp_id", oppIdB);
+                    List<PayerBuffer> payerBufferList = payerBufferMapper.selectList(qw3);
+                    for (PayerBuffer p : payerBufferList) {
+                        Payer payer = new Payer();
+                        payer.setpName(p.getPbName());
+                        payer.setpDept(p.getPbDept());
+                        payer.setpPosition(p.getPbPosition());
+                        payer.setpPhone(p.getPbPhone());
+                        payer.setpDecision(p.getPbDecision());
+                        payer.setpEffect(p.getPbEffect());
+                        payer.setpAgree(p.getPbAgree());
+                        payer.setpOppId(new_opp_id);
+                        payerList.add(payer);
+                    }
 
+                    // insert到四张表
+                    opportunityMapper.insert(opp);
+                    for (SubOpportunity s : subOpportunityList) {
+                        subOpportunityMapper.insert(s);
+                    }
+                    for (Competitor c : competitorList) {
+                        competitorMapper.insert(c);
+                    }
+                    for (Payer p : payerList) {
+                        payerMapper.insert(p);
+                    }
 
-
-
-
-
-
-
-
+                    // 删除缓存表中的对应数据
+                    subOpportunityBufferMapper.delete(qw1);
+                    competitorBufferMapper.delete(qw2);
+                    payerBufferMapper.delete(qw3);
+                    QueryWrapper<Approvallog> qw4 = Wrappers.query();
+                    qw4.eq("app_opp_id", oppIdB);
+                    approvallogMapper.delete(qw4);
+                    opportunityBufferMapper.deleteById(oppIdB);
                 }
+
                 else {
                     // 修改机会
+                    // update 机会表
+                    Opportunity updatedOpp = new Opportunity();
+                    List<SubOpportunity> addSubOppList = new ArrayList<>();
+                    List<SubOpportunity> updateSubOppList = new ArrayList<>();
+                    List<Competitor> addCompetitorList = new ArrayList<>();
+                    List<Payer> addPayerList = new ArrayList<>();
+
+                    updatedOpp.setOppId(opb.getOppbOppId());
+                    updatedOpp.setOppName(opb.getOppbName());
+                    updatedOpp.setOppSalesDept(opb.getOppbSalesDept());
+                    updatedOpp.setOppCustomerManagerId(opb.getOppbCustomerManagerId());
+                    updatedOpp.setOppSignTime(opb.getOppbSignTime());
+                    updatedOpp.setOppBelonging(opb.getOppbBelonging());
+                    // 将机会状态重新设为“正常”
+                    updatedOpp.setOppStatus("30");
+                    updatedOpp.setOppPhase(opb.getOppbPhase());
+                    updatedOpp.setOppType(opb.getOppbType());
+                    updatedOpp.setOppProduct(opb.getOppbProduct());
+                    updatedOpp.setOppBackground(opb.getOppbBackground());
+                    updatedOpp.setOppCigarettes(opb.getOppbCigarettes());
+                    updatedOpp.setOppCusId(opb.getOppbCusId());
+                    updatedOpp.setOppOrigin(opb.getOppbOrigin());
+
+                    // update 子机会表
+                    QueryWrapper<SubOpportunityBuffer> qw1 = Wrappers.query();
+                    qw1.eq("sub_oppb_opp_id", oppIdB);
+                    List<SubOpportunityBuffer> subOpportunityBufferList = subOpportunityBufferMapper.selectList(qw1);
+                    for (SubOpportunityBuffer sb : subOpportunityBufferList) {
+                        SubOpportunity s = new SubOpportunity();
+                        s.setSubOppName(sb.getSubOppbName());
+                        s.setSubOppType(sb.getSubOppbType());
+                        s.setSubOppProduct(sb.getSubOppbProduct());
+                        s.setSubOppDept(sb.getSubOppbDept());
+                        s.setSubOppCurrency(sb.getSubOppbCurrency());
+                        s.setSubOppMoney(sb.getSubOppbMoney());
+                        s.setSubOppOppId(updatedOpp.getOppId());
+                        s.setSubOppStatus("30");
+                        // 因为在新增子机会时不能填写状态，状态是在审批通过后才加上的，因此可以用状态是否为null来判断是新增还是修改
+                        if (sb.getSubOppbStatus() == null){
+                            // 新增子机会
+                            addSubOppList.add(s);
+                        }
+                        else {
+                            // 更新子机会
+                            QueryWrapper<SubOpportunity> qw_s = Wrappers.query();
+                            qw_s.eq("sub_opp_name", s.getSubOppName()).eq("sub_opp_opp_id", s.getSubOppOppId());
+                            List<SubOpportunity> sbs = subOpportunityMapper.selectList(qw_s);
+                            s.setSubOppId(sbs.get(0).getSubOppId());
+                            updateSubOppList.add(s);
+                        }
+                    }
+
+                    // update 竞争情况表
+                    QueryWrapper<CompetitorBuffer> qw2 = Wrappers.query();
+                    qw2.eq("compb_opp_id", oppIdB);
+                    List<CompetitorBuffer> competitorBufferList = competitorBufferMapper.selectList(qw2);
+                    for (CompetitorBuffer c : competitorBufferList) {
+                        // 判断是否为新增
+                        QueryWrapper<Competitor> qw_c = Wrappers.query();
+                        qw_c.eq("comp_name", c.getCompbName()).eq("comp_opp_id", opb.getOppbOppId());
+                        int num = competitorMapper.selectCount(qw_c);
+                        if (num == 0){
+                            Competitor competitor = new Competitor();
+                            competitor.setCompName(c.getCompbName());
+                            competitor.setCompPosition(c.getCompbPosition());
+                            competitor.setCompOppId(updatedOpp.getOppId());
+                            addCompetitorList.add(competitor);
+                        }
+                    }
+
+                    // update 购买决策人表
+                    QueryWrapper<PayerBuffer> qw3 = Wrappers.query();
+                    qw3.eq("pb_opp_id", oppIdB);
+                    List<PayerBuffer> payerBufferList = payerBufferMapper.selectList(qw3);
+                    for (PayerBuffer p : payerBufferList) {
+                        // 判断是否为新增
+                        QueryWrapper<Payer> qw_p = Wrappers.query();
+                        qw_p.eq("p_name", p.getPbName()).eq("p_opp_id", opb.getOppbOppId());
+                        int num = payerMapper.selectCount(qw_p);
+                        if (num == 0){
+                            Payer payer = new Payer();
+                            payer.setpName(p.getPbName());
+                            payer.setpDept(p.getPbDept());
+                            payer.setpPosition(p.getPbPosition());
+                            payer.setpPhone(p.getPbPhone());
+                            payer.setpDecision(p.getPbDecision());
+                            payer.setpEffect(p.getPbEffect());
+                            payer.setpAgree(p.getPbAgree());
+                            payer.setpOppId(updatedOpp.getOppId());
+                            addPayerList.add(payer);
+                        }
+                    }
+
+                    // 更新4张表
+                    opportunityMapper.updateById(updatedOpp);
+                    for (SubOpportunity subOpportunity : addSubOppList) {
+                        subOpportunityMapper.insert(subOpportunity);
+                    }
+                    for (SubOpportunity s : updateSubOppList) {
+                        subOpportunityMapper.updateById(s);
+                    }
+                    for (Competitor competitor : addCompetitorList) {
+                        competitorMapper.insert(competitor);
+                    }
+                    for (Payer payer : addPayerList) {
+                        payerMapper.insert(payer);
+                    }
+
+                    // 删除缓存表中的对应数据
+                    subOpportunityBufferMapper.delete(qw1);
+                    competitorBufferMapper.delete(qw2);
+                    payerBufferMapper.delete(qw3);
+                    QueryWrapper<Approvallog> qw4 = Wrappers.query();
+                    qw4.eq("app_opp_id", oppIdB);
+                    approvallogMapper.delete(qw4);
+                    opportunityBufferMapper.deleteById(oppIdB);
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+                msg = "已通过机会！";
             }
 
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        return null;
+        return RespBean.ok(200, msg);
     }
 
 

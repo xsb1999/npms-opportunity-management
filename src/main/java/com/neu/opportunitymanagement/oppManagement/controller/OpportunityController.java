@@ -177,6 +177,7 @@ public class OpportunityController {
             respBean = iOpportunityService.approval(approval);
         }catch (Exception e){
             respBean = RespBean.error(500, "系统错误，请联系管理员...");
+            System.err.println(e);
         }
         return respBean;
     }
