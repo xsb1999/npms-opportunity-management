@@ -9,6 +9,7 @@ public class Flow implements Serializable {
     private String oppName;
     private String oppSubmiter;
     private String submitDate;
+    private String oppPhase;
 
     public String getFlowName() {
         return flowName;
@@ -58,6 +59,14 @@ public class Flow implements Serializable {
         this.submitDate = submitDate;
     }
 
+    public String getOppPhase() {
+        return oppPhase;
+    }
+
+    public void setOppPhase(String oppPhase) {
+        this.oppPhase = oppPhase;
+    }
+
     @Override
     public String toString() {
         return "Flow{" +
@@ -67,6 +76,7 @@ public class Flow implements Serializable {
                 ", oppName='" + oppName + '\'' +
                 ", oppSubmiter='" + oppSubmiter + '\'' +
                 ", submitDate='" + submitDate + '\'' +
+                ", oppPhase='" + oppPhase + '\'' +
                 '}';
     }
 }
