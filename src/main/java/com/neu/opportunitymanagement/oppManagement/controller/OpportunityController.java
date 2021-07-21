@@ -38,8 +38,8 @@ public class OpportunityController {
 
     // 初始化机会管理页面
     @GetMapping("getMainPage")
-    public RespBean getMainPage(@RequestParam String empId, @RequestParam String empPositionId) {
-        OppManagePageInfo oppManagePageInfo = iOpportunityService.getMainPage(empId, empPositionId);
+    public RespBean getMainPage(@RequestParam String empId) {
+        OppManagePageInfo oppManagePageInfo = iOpportunityService.getMainPage(empId);
         RespBean respBean = RespBean.ok(200,"进入机会管理页面",oppManagePageInfo);
         return respBean;
     }
@@ -74,8 +74,8 @@ public class OpportunityController {
 
     // 点击机会编号展示机会详细信息
     @GetMapping("showOppDetail")
-    public RespBean showOppDetail(@RequestParam String oppId, @RequestParam String empPositionId){
-        OppDetail oppDetail = iOpportunityService.showOppDetail(oppId, empPositionId);
+    public RespBean showOppDetail(@RequestParam String oppId, @RequestParam String empId){
+        OppDetail oppDetail = iOpportunityService.showOppDetail(oppId, empId);
         RespBean respBean = RespBean.ok(200,"ok",oppDetail);
         return respBean;
     }
@@ -157,8 +157,8 @@ public class OpportunityController {
 
     // 机会审批页面初始化
     @GetMapping("getApprovalPage")
-    public RespBean getApprovalPage(@RequestParam String empPositionId){
-        return iOpportunityService.getApprovalPage(empPositionId);
+    public RespBean getApprovalPage(@RequestParam String empId){
+        return iOpportunityService.getApprovalPage(empId);
     }
 
 

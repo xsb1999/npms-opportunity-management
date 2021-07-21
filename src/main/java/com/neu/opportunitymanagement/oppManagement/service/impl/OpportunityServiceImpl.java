@@ -60,7 +60,11 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
 
 
     @Override
-    public OppManagePageInfo getMainPage(String emp_id, String emp_position) {
+    public OppManagePageInfo getMainPage(String emp_id) {
+
+        // 根据员工id获取员工职位
+        Employee employee = employeeMapper.selectById(emp_id);
+        String emp_position = employee.getEmpPositionId();
 
         List<DeptInfo> deptInfoList = new ArrayList<>();
         List<EmpInfo> empInfoList = new ArrayList<>();
@@ -165,7 +169,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     }
 
     @Override
-    public OppDetail showOppDetail(String oppId, String empPositionId) {
+    public OppDetail showOppDetail(String oppId, String empId) {
+
+        Employee e = employeeMapper.selectById(empId);
+        String empPositionId = e.getEmpPositionId();
 
         Opportunity opportunity = new Opportunity();
         List<SubOpportunity> subOpportunityList = new ArrayList<>();
@@ -334,7 +341,10 @@ public class OpportunityServiceImpl extends ServiceImpl<OpportunityMapper, Oppor
     }
 
     @Override
-    public RespBean getApprovalPage(String empPositionId) {
+    public RespBean getApprovalPage(String empId) {
+        // 根据员工id获取员工职位
+        Employee employee = employeeMapper.selectById(empId);
+        String empPositionId = employee.getEmpPositionId();
         List<Flow> flowList = opportunityBufferMapper.getApproveOppList(empPositionId);
         for (Flow flow : flowList) {
             if (flow.getOppId() == null){

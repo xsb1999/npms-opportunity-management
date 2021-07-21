@@ -27,7 +27,7 @@ import java.util.List;
 public interface IOpportunityService extends IService<Opportunity> {
 
     // 初始化客户管理页面
-    public OppManagePageInfo getMainPage(String emp_id, String emp_position);
+    public OppManagePageInfo getMainPage(String emp_id);
 
     // 销售部门和客户经理二级联动
     public List<EmpInfo> getEmpByDept(String dept_id);
@@ -39,7 +39,7 @@ public interface IOpportunityService extends IService<Opportunity> {
     public List<OppTypeInfo> getTypeByProduct(String pro_id);
 
     // 点击机会编号展示机会详细信息
-    public OppDetail showOppDetail(String oppId, String empPositionId);
+    public OppDetail showOppDetail(String oppId, String empId);
 
     // 机会查询
     public RespBean getOpportunity(OppSearchCondition oppSearchCondition);
@@ -51,7 +51,7 @@ public interface IOpportunityService extends IService<Opportunity> {
     public RespBean getOppTrackMainPage(String oppId);
 
     // 机会审批页面初始化
-    public RespBean getApprovalPage(String empPositionId);
+    public RespBean getApprovalPage(String empId);
 
     // 点击“审批”按钮，显示机会审批信息
     public RespBean showOppApproveDetail(String oppIdB);
