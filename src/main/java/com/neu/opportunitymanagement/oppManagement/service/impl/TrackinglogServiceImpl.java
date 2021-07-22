@@ -36,7 +36,9 @@ public class TrackinglogServiceImpl extends ServiceImpl<TrackinglogMapper, Track
         // 更新机会跟踪日志表
         try {
             // 删除跟踪记录
-            trackinglogMapper.deleteBatchIds(deletedTrackId);
+            if (!deletedTrackId.isEmpty()){
+                trackinglogMapper.deleteBatchIds(deletedTrackId);
+            }
             for (Trackinglog t : updateTrackList) {
                 // insert
                 if (t.gettId() == null){
